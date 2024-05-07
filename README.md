@@ -112,3 +112,118 @@ You can test the API using tools like Postman or Curl:
 This will provide you with a basic but functional **CRUD API** for **MongoDB** using **Flask**
 
 Adjust the structure and complexity based on your specific requirements and **MongoDB** setup
+
+## 5. Adding Swagger OpenAPI support to the above application
+
+To add **Swagger OpenAPI** documentation support to your existing **Flask** application, you can use the **flask-restx** library, which integrates well with Flask applications and provides built-in support for **Swagger** documentation generation
+
+Below is a modified version of your application with OpenAPI documentation added
+
+**Step-by-Step Instructions**
+
+**Install flask-restx**: If you haven't already installed flask-restx, you can do so using **pip**:
+
+```
+pip install flask-restx
+```
+
+**Modify the Flask Application**: Update your application to use **flask-restx** which includes namespaces, resource classes, and documentation automatically generated from your routes and models
+
+Here's how you can modify your application:
+
+```python
+from flask import Flask, request
+from flask_restx import Api, Resource, fields
+from flask_pymongo import PyMongo
+from bson import ObjectId, json_util
+import json
+
+app = Flask(__name__)
+
+# Setup MongoDB connection
+app.config["MONGO_URI"] = "mongodb://localhost:27017/mydatabase"
+mongo = PyMongo(app)
+
+# Initialize API
+api = Api(app, version='1.0', title='MongoDB Flask API',
+          description='A simple API to interact with MongoDB')
+
+# Namespace
+ns = api.namespace('myCollection', description='My Collection operations')
+
+# Model for the MongoDB Document (used for Swagger documentation)
+document_model = api.model('Document', {
+    'name': fields.String(required=True, description='Name of the person'),
+    'age': fields.Integer(description='Age of the person'),
+})
+
+# Convert MongoDB response to JSON
+def parse_json(data):
+    return json.loads(json_util.dumps(data))
+
+@ns.route('/create')
+class Create(Resource):
+    @ns.expect(document_model)
+    @ns.response(201, 'Document created successfully.')
+    def post(self):
+        # Create a new document
+        _id = mongo.db.myCollection.insert_one(request.json).inserted_id
+        return {'id': str(_id)}, 201
+
+@ns.route('/read/<string:id>')
+@ns.param('id', 'The Document identifier')
+class Read(Resource):
+    @ns.response(200, 'Document found.')
+    @ns.response(404, 'Document not found.')
+    def get(self, id):
+        # Read a document
+        document = mongo.db.myCollection.find_one({"_id": ObjectId(id)})
+        if document:
+            return parse_json(document), 200
+        else:
+            return {'error': 'Document not found'}, 404
+
+@ns.route('/update/<string:id>')
+@ns.param('id', 'The Document identifier')
+class Update(Resource):
+    @ns.expect(document_model)
+    @ns.response(200, 'Document updated successfully.')
+    @ns.response(400, 'Nothing to update.')
+    def put(self, id):
+        # Update a document
+        result = mongo.db.myCollection.update_one({"_id": ObjectId(id)}, {"$set": request.json})
+        if result.modified_count:
+            return {'success': True}, 200
+        else:
+            return {'error': 'Nothing to update'}, 400
+
+@ns.route('/delete/<string:id>')
+@ns.param('id', 'The Document identifier')
+class Delete(Resource):
+    @ns.response(200, 'Document deleted successfully.')
+    @ns.response(404, 'Document not found.')
+    def delete(self, id):
+        # Delete a document
+        result = mongo.db.myCollection.delete_one({"_id": ObjectId(id)})
+        if result.deleted_count:
+            return {'success': True}, 200
+        else:
+            return {'error': 'Document not found'}, 404
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+***Explanation**:
+
+**API Initialization**: Api(app) creates a main entry point for the API which will include auto-generated Swagger documentation
+
+**Namespace**: Used to organize and group operations. Each namespace can be considered a single resource or a group of related resources
+
+**Resource Classes**: These replace your regular Flask view functions. Methods of these classes correspond to HTTP methods
+
+**Model Definitions**: Used for request validation and also help generate structured documentation
+
+**Responses and Expectations**: Define possible HTTP responses and set expectations for input models which are reflected in the Swagger documentation
+
+This setup will provide a **Swagger UI** at the root URL of your **Flask** application (e.g., **http://localhost:5000/**) when you run the app, allowing you to interact with your API through a web interface.
