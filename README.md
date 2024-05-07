@@ -214,7 +214,7 @@ if __name__ == '__main__':
     app.run(debug=True)
 ```
 
-***Explanation**:
+**Explanation**:
 
 **API Initialization**: Api(app) creates a main entry point for the API which will include auto-generated Swagger documentation
 
