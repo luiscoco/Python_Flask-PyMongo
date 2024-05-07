@@ -8,7 +8,7 @@ Before starting, make sure you have MongoDB installed and running on your local 
 
 ## 1. Install Required Packages
 
-First, you need to install the necessary **Python packages**
+### 1.1. First, you need to install the necessary **Python packages**
 
 You can do this using **pip**
 
@@ -17,6 +17,32 @@ The primary packages are **Flask** for the web framework and **Flask-PyMongo** f
 ```
 pip install Flask Flask-PyMongo
 ```
+
+We also have to install Flask-restx for obtaining the swagger support
+
+```
+pip install flask-restx
+```
+
+### 1.2. Install/run Docker Desktop and pull/run Mongo image
+
+Run Docker Desktop
+
+Pull mongodb docker image and run it
+
+We first pull the mongodb image
+
+```
+docker pull mongo
+```
+
+We run the mongo docker container
+
+```
+docker run --name mongodb -d -p 27017:27017 --restart unless-stopped mongo
+```
+
+Verify the image and container in Docker Desktop
 
 ## 2. Python Code for the CRUD API
 
@@ -227,3 +253,20 @@ if __name__ == '__main__':
 **Responses and Expectations**: Define possible HTTP responses and set expectations for input models which are reflected in the Swagger documentation
 
 This setup will provide a **Swagger UI** at the root URL of your **Flask** application (e.g., **http://localhost:5000/**) when you run the app, allowing you to interact with your API through a web interface.
+
+![image](https://github.com/luiscoco/Python_Flask-PyMongo/assets/32194879/798d30e4-ac36-4f82-b885-96ae3d69a22b)
+
+![image](https://github.com/luiscoco/Python_Flask-PyMongo/assets/32194879/e1d36ed9-37db-4329-8400-7b9ff99bf6dd)
+
+![image](https://github.com/luiscoco/Python_Flask-PyMongo/assets/32194879/d871d49a-866e-4f60-9275-2efd46b206de)
+
+![image](https://github.com/luiscoco/Python_Flask-PyMongo/assets/32194879/a5d5a0fa-c206-4d37-b1bf-b3c556061a53)
+
+![image](https://github.com/luiscoco/Python_Flask-PyMongo/assets/32194879/1e24246f-67be-48fa-8375-51083d693d6f)
+
+We also can verify the new records with Studio 3T for MongoDb
+
+![image](https://github.com/luiscoco/Python_Flask-PyMongo/assets/32194879/47d7434c-9757-43df-af16-0aed667ac8a9)
+
+
+
